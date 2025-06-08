@@ -1,43 +1,44 @@
 # Carrom‑Bot 🤖🎯
 
-An autonomous carrom‑playing robot that uses computer vision and AI to analyze the board state, calculate the optimal shot, and then drive stepper/servo motors (via an Arduino) to execute the shot.
+An autonomous carrom‑playing robot that sees the board, computes the best shot, and drives motors to strike.
 
 ---
 
 ## 🔍 Features
 
-- **Real‑time coin detection** using OpenCV  
-- **AI‑driven shot planning** (direct, cut, side shots)  
-- **Serial communication** with Arduino for precise motor control  
-- **Closed‑loop**: image → plan → shoot → re‑scan → repeat  
+- **Real‑time coin & striker detection** via OpenCV  
+- **AI‑driven shot planning** (direct, cut & side‑shots)  
+- **Automated motor control** over serial (Arduino + stepper/servo)  
+- **Closed‑loop operation**: sense → plan → shoot → re‑scan → repeat  
+- **Configurable parameters** for camera calibration, shot scoring and motor tuning  
 
 ---
 
-🎯 How It Works
-Capture
+## 🎯 How It Works
 
-Grab a frame from the camera.
+1. **Board Capture & Pre‑processing**  
+   - Acquire frame from webcam or USB camera.  
+   - Undistort & crop to board region using corner detection.  
 
-Pre‑process (blur, threshold) and detect board corners.
+2. **Coin & Striker Detection**  
+   - Convert to HSV and threshold for white, black & red coins.  
+   - Use Hough‑Circle (or contour) detection to find coin centers.  
+   - Identify striker by unique size or color marker.  
 
-Detect Coins
+3. **Shot Calculation**  
+   - For each target coin, simulate candidate shots (direct, cut, side).  
+   - Compute geometry: incidence/reflection angles, collision points.  
+   - Estimate required force (power) based on distance & angle.  
+   - Score all shots by success probability and pick the best.  
 
-Use color filtering and Hough/Circle detection to locate striker & coins.
+4. **Motor Actuation**  
+   - Send angle & power commands over serial to the Arduino.  
+   - Arduino drives the horizontal stepper (striker position).  
+   - Servo sets the strike angle.  
+   - Trigger solenoid or spring mechanism to execute the shot.  
 
-Classify coin colors (white, black, red).
+5. **Feedback Loop**  
+   - After striking, pause briefly then re‑capture the board.  
+   - Update coin positions and repeat until the game ends or no legal shots remain.  
 
-Plan Shot
 
-Given coin and pocket positions, compute angles & power for direct/cut/side shots.
-
-Score and select the shot with highest success probability.
-
-Actuate
-
-Send position/angle/power commands via serial to Arduino.
-
-Stepper aligns striker horizontally; servo sets angle; spring/solenoid strikes.
-
-Repeat
-
-After the strike, re‑scan and plan the next move until the game ends.
